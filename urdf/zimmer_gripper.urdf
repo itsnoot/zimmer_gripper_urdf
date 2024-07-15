@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+	
+	<!--MATERIALS-->
+	<material name="silver">
+		<color rgba="0.75 0.75 0.75 1"/>
+	</material>
+
+	<material name="gold">
+		<color rgba="0.90 0.80 0 1"/>
+	</material>
+
+	<material name="black">
+		<color rgba="0 0 0 1"/>
+	</material>
+	
+	<!--CONSTANTS-->
+	<xacro:property name="camera_depth" value="0.032"/>
+	<xacro:property name="mount_thickness" value="0.0025"/>
+	<xacro:property name="gripper_plate" value="0.00647"/>
+	<xacro:property name="mount_plate" value="0.00317"/>
+	<xacro:property name="box_depth" value="0.045"/>
+	<xacro:property name="top_mid_mount_plate" value="0.0635"/>
+	<xacro:property name="camera_height" value="0.03"/>
+	<xacro:property name="finger_height" value="0.01092"/>
+	<xacro:property name="slide_to_box" value="0.0111"/>
+
+	<!--MOUNT-->
+	<link name="base_link">
+    	<visual>
+			<origin rpy="0.0 0 0" xyz="0 0 0"/>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UR20_MOUNT_VISUAL.STL"/>
+			</geometry>
+			<material name="gold"/>
+		</visual>
+		<collision>
+      		<origin rpy="0.0 0 0" xyz="0 0 0"/>
+      		<geometry>
+        		<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UR20_MOUNT.STL"/>
+      		</geometry>
+    	</collision>
+  	</link>
+
+	<!--CAMERA-->
+	<link name="camera">
+		<visual>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UR20_CAMERA_VISUAL_BASE.STL"/>
+			</geometry>
+			<material name="silver"/>
+			<origin rpy="0 0 0" xyz="${camera_depth + mount_thickness} 0 0"/>
+		</visual>
+		<visual>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UR20_CAMERA_VISUAL_GLASS.STL"/>
+			</geometry>
+			<material name="silver"/>
+			<origin rpy="0 0 0" xyz="${camera_depth + mount_thickness} 0 0"/>
+		</visual>
+		<visual>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UR20_CAMERA_VISUAL_FRAME2.STL"/>
+			</geometry>
+			<material name="silver"/>
+			<origin rpy="0 0 0" xyz="${camera_depth + mount_thickness} 0 0"/>
+		</visual>
+		<collision>
+      		<origin rpy="0.0 0 0" xyz="${camera_depth + mount_thickness} 0 0"/>
+      		<geometry>
+        		<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UR20_CAMERA.STL"/>
+      		</geometry>
+    	</collision>
+	</link>
+
+	<joint name="camera_to_camera_mount" type="fixed">
+		<parent link="base_link"/>
+		<child link="camera"/>
+	</joint>
+
+	<!--MOUNT ADAPTER PLATE 3.175mm-->
+	<link name="mount_adapter">
+		<visual>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UR20_MOUNT_PLATE_VISUAL.STL"/>
+			</geometry>
+			<material name="gold"/>
+			<origin rpy="0 0 0" xyz="${camera_depth + mount_thickness} 0 ${-1*(top_mid_mount_plate + camera_height)}"/>
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="${camera_depth + mount_thickness} 0 ${-1*(top_mid_mount_plate + camera_height)}"/>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UR20_MOUNT_PLATE.STL"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="mount_adapter" type="fixed">
+		<parent link="base_link"/>
+		<child link="mount_adapter"/>
+	</joint>
+
+	<!--GRIPPER ADAPTER PLATE 6.47mm-->	
+	<link name="gripper_adapter">
+		<visual>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UR20_GRIPPER_PLATE_VISUAL.STL"/>
+			</geometry>
+			<material name="gold"/>
+			<origin rpy="0 0 0" xyz="0.036975 0 ${-1*(top_mid_mount_plate + camera_height)}"/>
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0.036975 0 ${-1*(top_mid_mount_plate + camera_height)}"/>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UR20_GRIPPER_PLATE.STL"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="gripper_adapter" type="fixed">
+		<parent link="mount_adapter"/>
+		<child link="gripper_adapter"/>
+	</joint>
+
+	<!--ZIMMER BOX 130mm x 62mm x 45mm-->	
+	<link name="zimmer_box">
+		<visual>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/ZIMMER_BOX.STL"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0.08706 0 ${-1*(top_mid_mount_plate + camera_height)}"/>
+			<material name="black"/>
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0.08706 0 ${-1*(top_mid_mount_plate + camera_height)}"/>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/ZIMMER_BOX.STL"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="zimmer_base_to_plate" type="fixed">
+		<parent link="gripper_adapter"/>
+		<child link="zimmer_box"/>
+	</joint>
+
+	<!--ZIMMER FINGER LEFT-->
+	<link name="left_finger">
+		<visual>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/PRETTY_FINGER.STL"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="${mount_plate + gripper_plate + box_depth + mount_thickness + camera_depth} 0 ${-1*(top_mid_mount_plate + camera_height) + slide_to_box}"/>
+			<material name="silver"/>
+		</visual>
+		<collision>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UGLY_FINGER.STL"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="${mount_plate + gripper_plate + box_depth + mount_thickness + camera_depth} 0 ${-1*(top_mid_mount_plate + camera_height) + slide_to_box}"/>
+		</collision>
+	</link>
+
+	<joint name="zimmer_to_finger_L" type="prismatic">
+		<parent link="zimmer_box"/>
+		<child link="left_finger"/>
+		<limit effort="1000" lower="-0.07" upper="0.06" velocity="0.5"/>
+		<axis xyz="0 1 0"/>
+	</joint>
+
+	<!--ZIMMER FINGER RIGHT-->
+	<link name="right_finger">
+		<visual>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/PRETTY_FINGER.STL"/>
+			</geometry>
+			<origin rpy="3.1415 0 0" xyz="${mount_plate + gripper_plate + box_depth + mount_thickness + camera_depth} 0 ${-1*(top_mid_mount_plate + camera_height + slide_to_box)}"/>
+			<material name="silver"/>
+		</visual>
+		<collision>
+			<geometry>
+				<mesh filename="file:///home/feykenews/ros2_humble/src/urdf_tings/meshes/UGLY_FINGER.STL"/>
+			</geometry>
+			<origin rpy="3.1415 0 0" xyz="${mount_plate + gripper_plate + box_depth + mount_thickness + camera_depth} 0 ${-1*(top_mid_mount_plate + camera_height + slide_to_box)}"/>
+		</collision>
+	</link>
+
+	<joint name="zimmer_to_finger_R" type="prismatic">
+		<parent link="zimmer_box"/>
+		<child link="right_finger"/>
+		<limit effort="1000" lower="-0.06" upper="0.07" velocity="0.5"/>
+		<axis xyz="0 1 0"/>
+	</joint>
+
+</robot>
